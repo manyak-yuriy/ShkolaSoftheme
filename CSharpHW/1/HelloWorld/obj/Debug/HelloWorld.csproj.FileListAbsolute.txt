@@ -1,0 +1,6 @@
+C:\Users\User\Desktop\Soft\C#\repo\ShkolaSoftheme\CSharpHW\1\HelloWorld\bin\Debug\HelloWorld.exe.config
+C:\Users\User\Desktop\Soft\C#\repo\ShkolaSoftheme\CSharpHW\1\HelloWorld\bin\Debug\HelloWorld.exe
+C:\Users\User\Desktop\Soft\C#\repo\ShkolaSoftheme\CSharpHW\1\HelloWorld\bin\Debug\HelloWorld.pdb
+C:\Users\User\Desktop\Soft\C#\repo\ShkolaSoftheme\CSharpHW\1\HelloWorld\obj\Debug\HelloWorld.csprojResolveAssemblyReference.cache
+C:\Users\User\Desktop\Soft\C#\repo\ShkolaSoftheme\CSharpHW\1\HelloWorld\obj\Debug\HelloWorld.exe
+C:\Users\User\Desktop\Soft\C#\repo\ShkolaSoftheme\CSharpHW\1\HelloWorld\obj\Debug\HelloWorld.pdb
