@@ -31,6 +31,7 @@ namespace Valid
         string GetFullInfo();
 
         bool Equals(object obj);
+
     }
 
     public class User: IUser
@@ -76,7 +77,7 @@ namespace Valid
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return Name.GetHashCode() ^ Password.GetHashCode() ^ Email.GetHashCode();
         }
     }
 

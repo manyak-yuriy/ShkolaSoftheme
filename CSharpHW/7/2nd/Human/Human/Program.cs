@@ -43,7 +43,7 @@ namespace Human
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return Age ^ FirstName.GetHashCode() ^ LastName.GetHashCode() ^ BirthDate.GetHashCode();
         }
 
         public static bool operator==(Human first, Human second)
