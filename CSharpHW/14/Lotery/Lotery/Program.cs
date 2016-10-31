@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lottery
+namespace Lotery
 {
     public static class Util
     {
@@ -29,7 +29,7 @@ namespace Lottery
         private static byte minNum = 0;
         private static byte maxNum = 9;
 
-        private byte[] numbers;
+        private readonly byte[] _numbers;
 
         public static int Count
         {
@@ -38,13 +38,13 @@ namespace Lottery
 
         public Ticket()
         {
-            numbers = new byte[count];
+            _numbers = new byte[count];
         }
 
         public byte this[int index]
         {
-            get { return numbers[index]; }
-            private set { numbers[index] = value; }
+            get { return _numbers[index]; }
+            private set { _numbers[index] = value; }
         }
 
         public static Ticket getFromConsole()
@@ -52,8 +52,7 @@ namespace Lottery
             Ticket ticket = new Ticket();
             for (int i = 0; i < count; i++)
             {
-                int? num;
-                num = Util.GetInt(minNum, maxNum);
+                int? num = Util.GetInt(minNum, maxNum);
                 while (num == null)
                 {
                     Console.WriteLine("Incorrect number. Try again: ");
