@@ -23,13 +23,42 @@ namespace ConsoleApplication1
             }
 
             arr[size] = rand.Next(0, maxRand);
+        }
 
+        private static void shuffleArray(int[] arr, int size)
+        {
+            var rand = new Random();
+            for (int i = 0; i < size; i++)
+            {
+                int randInd = rand.Next(i + 1, size + 1);
+
+                int temp = arr[randInd];
+                arr[randInd] = arr[i];
+                arr[i] = temp;
+            }
+        }
+
+        private static int findUnique(int[] arr, int size)
+        {
+            int res = 0;
+            for (int i = 0; i <= size; i++)
+                res = res ^ arr[i];
+            return res;
         }
         static void Main(string[] args)
         {
-            int size = 10;
+            int size = 10000;
             int[] arr;
             initArr(out arr, size);
+            shuffleArray(arr, size);
+
+            Console.WriteLine("Array:");
+            foreach (int elem in arr)
+                Console.Write("{0} ", elem);
+            Console.WriteLine();
+
+            Console.WriteLine("Unique number: {0}", findUnique(arr, size));
+
             Console.ReadKey();
         }
     }
