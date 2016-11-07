@@ -16,180 +16,105 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RegValidation
 {
-    public class MainValidator : ValidationAttribute
+    // attribute class for gender validation
+    public class Gender : ValidationAttribute
     {
-        public override bool IsValid(object value)
+        protected override System.ComponentModel.DataAnnotations.ValidationResult IsValid(object value,
+            ValidationContext validationContext)
         {
-            MainWindow mw = value as MainWindow;
-            if (mw == null)
-                throw new NullReferenceException("Null-reference to main window");
 
-            bool res = (mw.firstNameValid() && mw.lastNameValid() && mw.birthDateValid()
-                        && mw.genderValid() && mw.emailValid() && mw.phoneValid() && mw.infoValid());
+            if (value.ToString() == "M" || value.ToString() == "F")
+            {
+                return System.ComponentModel.DataAnnotations.ValidationResult.Success;
+            }
 
-            return res;
-
+            return
+                new System.ComponentModel.DataAnnotations.ValidationResult(String.Format("{0} is not a gender", value));
         }
     }
 
+    public class UserData
+    {
+        public const int maxLen = 255;
+        public const int maxLenExtended = 2000;
+        public const int phoneLen = 10;
 
-    [MainValidator]
+
+        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Only letters are accaptable for first name")]
+        [MaxLength(maxLen, ErrorMessage = "Too long first name")]
+        public string FirstName { get; set; }
+
+        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Only letters are accaptable for last name")]
+        [MaxLength(maxLen, ErrorMessage = "Too long first name")]
+        public string LastName { get; set; }
+
+
+        public DateTime DateOfBirth { get; set; }
+
+        [EmailAddress]
+        [MaxLength(maxLen, ErrorMessage = "Too long email")]
+        public string Email { get; set; }
+
+        [Gender]
+        public string Gender { get; set; }
+
+        [MaxLength(maxLenExtended, ErrorMessage = "Too long info section")]
+        public string Info { get; set; }
+
+        [Phone]
+        public string PhoneNumber { get; set; }
+    }
+
     public partial class MainWindow : Window
     {
-        
+
         public MainWindow()
         {
             InitializeComponent();
         }
-        
+
         private void validate_Click(object sender, RoutedEventArgs e)
         {
-            var formVal = new MainValidator();
-
-            if (formVal.IsValid(this))
-                MessageBox.Show("Form data is correct!");
-            else
-                MessageBox.Show("Errors in data!");
-        }
-        
-
-
-        private const int maxLen = 255;
-        private const int maxLenExtended = 2000;
-        private const int phoneLen = 10;
-        public bool firstNameValid()
-        {
-            if (firstName.Text.Length >= maxLen)
-            {
-                //MessageBox.Show("First name is too long");
-                return false;
-            }
-                
-
-            foreach (char symbol in firstName.Text)
-                if (!Char.IsLetter(symbol))
-                {
-                    //MessageBox.Show("First name must contain only letters");
-                    return false;
-                }
-
-            return true;
-        }
-
-        public bool lastNameValid()
-        {
-            if (lastName.Text.Length >= maxLen)
-            {
-                //MessageBox.Show("Last name is too long");
-                return false;
-            }
-                
-
-            foreach (char symbol in lastName.Text)
-                if (!Char.IsLetter(symbol))
-                {
-                    //MessageBox.Show("Last name must contain only letters");
-                    return false;
-                }
-
-            return true;
-        }
-
-        public bool birthDateValid()
-        {
-            int day, month, year;
-
             try
             {
-                day = int.Parse(dayOfBirth.Text);
-                month = int.Parse(monthOfBirth.Text);
-                year = int.Parse(yearOfBirth.Text);
-            }
-            catch(Exception exc)
-            {
-                //MessageBox.Show(exc.Message);
-                return false;
-            }
-
-            if (day < 1 || day > 31)
-            {
-                //MessageBox.Show("Invalid day!");
-                return false;
-            }
-
-            if (month < 1 || month > 12)
-            {
-                //MessageBox.Show("Invalid month!");
-                return false;
-            }
-                
-            if (year <= 1900 || year >= DateTime.Now.Year)
-            {
-                //MessageBox.Show("The year of birth should be between 1900 and the current year!");
-                return false;
-            }
-
-            return true;
-        }
-
-        public bool genderValid()
-        {
-            string genderStr = gender.Text;
-
-            if (genderStr != "male" && genderStr != "female")
-            {
-                //MessageBox.Show("No such gender is defined!");
-                return false;
-            }
-            return true;
-        }
-
-        public bool emailValid()
-        {
-            string email = eMail.Text;
-            if (!email.Contains("@"))
-            {
-                //MessageBox.Show("email must contain @ sign!");
-                return false;
-            }
-
-            if (email.Length >= maxLen)
-            {
-                //MessageBox.Show("email is too long");
-                return false;
-            }
-
-            return true;
-        }
-
-        public bool phoneValid()
-        {
-            foreach (char symbol in phoneNum.Text)
-                if (!Char.IsDigit(symbol))
+                var UserData = new UserData()
                 {
-                    //MessageBox.Show("Phone number must contain only digits!");
-                    return false;
+                    FirstName = firstName.Text,
+                    LastName = lastName.Text,
+                    DateOfBirth = new DateTime(int.Parse(yearOfBirth.Text),
+                        int.Parse(monthOfBirth.Text),
+                        int.Parse(dayOfBirth.Text)),
+                    Gender = gender.Text,
+                    Email = eMail.Text,
+                    PhoneNumber = phoneNum.Text,
+                    Info = info.Text
+                };
+
+                var results = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+                var context = new ValidationContext(UserData);
+
+                if (!Validator.TryValidateObject(UserData, context, results, true))
+                {
+                    string msg = "";
+                    foreach (var error in results)
+                    {
+                        msg += (error.ErrorMessage) + "\n";
+                    }
+                    MessageBox.Show(msg);
                 }
-
-            if (phoneNum.Text.Length != phoneLen)
-            {
-                //MessageBox.Show("Phone number must be 10 digits long!");
-                return false;
+                else
+                {
+                    MessageBox.Show("Validated successfully!");
+                }
             }
 
-            return true;
-        }
-
-        public bool infoValid()
-        {
-            if (info.Text.Length >= maxLenExtended)
+            catch (Exception exc)
             {
-                //MessageBox.Show("Additional info is too long!");
-                return false;
+                MessageBox.Show(exc.Message);
             }
-
-            return true;
+            
         }
+        
 
     }
 }
