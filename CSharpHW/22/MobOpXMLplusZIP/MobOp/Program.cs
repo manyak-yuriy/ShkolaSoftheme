@@ -156,7 +156,7 @@ namespace MobOp
             return accounts;
         }
 
-        static void saveToFile(string fileName, List<MobileAccount> accounts, bool compress)
+        static void SaveToFile(string fileName, List<MobileAccount> accounts, bool compress)
         {
             var serializer = new DataContractSerializer(typeof(List<MobileAccount>));
             string path = fileName + ".xml";
@@ -174,14 +174,15 @@ namespace MobOp
             }
 
             if (compress)
-            {
+            {   
+                File.Delete(fileName + ".zip");
                 ZipFile.CreateFromDirectory("temp", fileName + ".zip");
                 Directory.Delete(@"temp\", true);
             }
                 
         }
 
-        static List<MobileAccount> restoreFromFile(string fileName, bool decompress)
+        static List<MobileAccount> RestoreFromFile(string fileName, bool decompress)
         {
             List<MobileAccount> accRestored;
 
@@ -221,13 +222,13 @@ namespace MobOp
             // XML serialization
             watch.Restart();
 
-            saveToFile(FileName, accounts, true);
+            SaveToFile(FileName, accounts, true);
 
             Console.WriteLine("Serialization to xml: {0} ms", watch.ElapsedMilliseconds);
 
             watch.Restart();
 
-            List<MobileAccount> accRestored = restoreFromFile(FileName, true);
+            List<MobileAccount> accRestored = RestoreFromFile(FileName, true);
 
             Console.WriteLine("Deserialization from xml: {0} ms", watch.ElapsedMilliseconds);
   
