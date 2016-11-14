@@ -96,6 +96,41 @@ class Program
         xmlDocument.Save(fileName);
     }
 
+    static void DeleteBook(string fileName, Book book)
+    {
+        XmlDocument xmlDocument = new XmlDocument();
+        xmlDocument.Load(fileName);
+
+        List<Book> books = new List<Book>();
+
+        XmlNodeList xmlNodes = xmlDocument.GetElementsByTagName("book");
+
+        foreach (XmlNode node in xmlNodes)
+        {
+            XmlNodeReader xmlNodeReader = new XmlNodeReader(node);
+            xmlNodeReader.Read();
+            xmlNodeReader.Read();
+            string author = xmlNodeReader.ReadElementContentAsString();
+            string title = xmlNodeReader.ReadElementContentAsString();
+            string genre = xmlNodeReader.ReadElementContentAsString();
+            string price = xmlNodeReader.ReadElementContentAsString();
+            string publishDate = xmlNodeReader.ReadElementContentAsString();
+            string description = xmlNodeReader.ReadElementContentAsString();
+
+            DateTime date;
+            DateTime.TryParseExact(publishDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                out date);
+
+            decimal p;
+            Decimal.TryParse(price, out p);
+
+            if (book.Author == author && book.Title == title && book.Genre == genre
+                                      && book.Price == p && book.PublishDate == date && book.Description == description)
+                node.ParentNode.RemoveChild(node);
+        }
+        
+    }
+
     static void Main(string[] args)
     {
         XmlDocument xmlDocument = new XmlDocument();
@@ -115,7 +150,7 @@ class Program
 
         AddNewBook(@"Books.xml", newBook);
         
-       
+        DeleteBook(@"Books.xml", newBook);
 
         Console.ReadKey();
     }
