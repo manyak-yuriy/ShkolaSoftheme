@@ -12,11 +12,53 @@ public class Book
     public decimal Price { get; set; }
     public DateTime PublishDate { get; set; }
     public string Description { get; set; }
+
+    public Book(Book b)
+    {
+        Author = b.Author;
+        Title = b.Title;
+        Genre = b.Genre;
+        Price = b.Price;
+        PublishDate = b.PublishDate;
+        Description = b.Description;
+    }
+
+    public Book()
+    {
+        
+    }
 }
 
 class Program
 {
-    
+    static Book XmlReadNext(XmlNodeReader xmlNodeReader)
+    {
+        Book newBook = new Book();
+
+        string author = xmlNodeReader.ReadElementContentAsString();
+        string title = xmlNodeReader.ReadElementContentAsString();
+        string genre = xmlNodeReader.ReadElementContentAsString();
+        string price = xmlNodeReader.ReadElementContentAsString();
+        string publishDate = xmlNodeReader.ReadElementContentAsString();
+        string description = xmlNodeReader.ReadElementContentAsString();
+
+        DateTime date;
+        DateTime.TryParseExact(publishDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None,
+            out date);
+
+        decimal p;
+        Decimal.TryParse(price, out p);
+
+        newBook.Author = author;
+        newBook.Title = title;
+        newBook.Genre = genre;
+        newBook.Price = p;
+        newBook.PublishDate = date;
+        newBook.Description = description;
+
+        return newBook;
+    }
+
     static List<Book> GetAllBooks(string fileName)
     {
         XmlDocument xmlDocument = new XmlDocument();
@@ -29,31 +71,41 @@ class Program
         foreach (XmlNode node in xmlNodes)
         {
             XmlNodeReader xmlNodeReader = new XmlNodeReader(node);
+
             xmlNodeReader.Read();
             xmlNodeReader.Read();
-            string author = xmlNodeReader.ReadElementContentAsString();
-            string title = xmlNodeReader.ReadElementContentAsString();
-            string genre = xmlNodeReader.ReadElementContentAsString();
-            string price = xmlNodeReader.ReadElementContentAsString();
-            string publishDate = xmlNodeReader.ReadElementContentAsString();
-            string description = xmlNodeReader.ReadElementContentAsString();
 
-            DateTime date;
-            DateTime.TryParseExact(publishDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                out date);
+            Book newBook = XmlReadNext(xmlNodeReader);
 
-            decimal p;
-            Decimal.TryParse(price, out p);
-
-            books.Add(new Book() {Author = author,
-                                  Title = title,
-                                  Genre = genre,
-                                  Price = p,
-                                  PublishDate = new DateTime(),
-                                  Description = description});
+            books.Add(newBook);
         }
 
         return books;
+    }
+
+    static Book GetBookById(string fileName, string id)
+    {
+        XmlDocument xmlDocument = new XmlDocument();
+        xmlDocument.Load(fileName);
+
+        List<Book> books = new List<Book>();
+
+        XmlNodeList xmlNodes = xmlDocument.GetElementsByTagName("book");
+
+        foreach (XmlNode node in xmlNodes)
+        {
+            XmlNodeReader xmlNodeReader = new XmlNodeReader(node);
+
+            xmlNodeReader.Read();
+            xmlNodeReader.Read();
+
+            Book newBook = XmlReadNext(xmlNodeReader);
+
+            if (node.Attributes?["id"].InnerText == id)
+                return newBook;
+        }
+
+        return null;
     }
 
     static void AddNewBook(string fileName, Book book)
@@ -91,7 +143,7 @@ class Program
         descriptionElement.InnerText = book.Description;
         newElement.AppendChild(descriptionElement);
 
-        xmlDocument.DocumentElement.AppendChild(newElement);
+        xmlDocument.DocumentElement?.AppendChild(newElement);
 
         xmlDocument.Save(fileName);
     }
@@ -110,34 +162,25 @@ class Program
             XmlNodeReader xmlNodeReader = new XmlNodeReader(node);
             xmlNodeReader.Read();
             xmlNodeReader.Read();
-            string author = xmlNodeReader.ReadElementContentAsString();
-            string title = xmlNodeReader.ReadElementContentAsString();
-            string genre = xmlNodeReader.ReadElementContentAsString();
-            string price = xmlNodeReader.ReadElementContentAsString();
-            string publishDate = xmlNodeReader.ReadElementContentAsString();
-            string description = xmlNodeReader.ReadElementContentAsString();
 
-            DateTime date;
-            DateTime.TryParseExact(publishDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                out date);
+            Book newBook = XmlReadNext(xmlNodeReader);
 
-            decimal p;
-            Decimal.TryParse(price, out p);
-
-            if (book.Author == author && book.Title == title && book.Genre == genre
-                                      && book.Price == p && book.PublishDate == date && book.Description == description)
-                node.ParentNode.RemoveChild(node);
+            if (book.Author == newBook.Author && book.Title == newBook.Title 
+                                      && book.Genre == newBook.Genre
+                                      && book.Price == newBook.Price 
+                                      && book.PublishDate == newBook.PublishDate 
+                                      && book.Description == newBook.Description)
+                node.ParentNode?.RemoveChild(node);
         }
         
     }
 
     static void Main(string[] args)
     {
-        XmlDocument xmlDocument = new XmlDocument();
-        xmlDocument.Load(@"Books.xml");
+        const string fileName = @"Books.xml";
 
         // Fetching all books from the library
-        List<Book> books = GetAllBooks(@"Books.xml");
+        List<Book> books = GetAllBooks(fileName);
 
         // Adding a book to the library
         Book newBook = new Book();
@@ -148,9 +191,13 @@ class Program
         newBook.PublishDate = DateTime.Now;
         newBook.Title = "Algorithms: theoretical approach to analysis";
 
-        AddNewBook(@"Books.xml", newBook);
+        AddNewBook(fileName, newBook);
         
-        DeleteBook(@"Books.xml", newBook);
+        // Deleting the book
+        DeleteBook(fileName, newBook);
+
+        // Search by id
+        Book book = GetBookById(fileName, "bk101");
 
         Console.ReadKey();
     }
