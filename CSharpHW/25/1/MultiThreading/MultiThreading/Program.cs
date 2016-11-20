@@ -16,6 +16,7 @@ namespace MultiThreading
         static void Main(string[] args)
         {
             string rootDir = @"D:\test";
+
             Console.WriteLine("Input path: ");
             string filePath = Console.ReadLine();
 
@@ -30,12 +31,13 @@ namespace MultiThreading
         static void TraverseDir(object pathObj)
         {
             string rootPath = (string)pathObj;
-            Console.WriteLine("thread {1}: Started travesing {0}", rootPath, Thread.CurrentThread.ManagedThreadId);
 
             if (!Directory.Exists(rootPath))
             {
                 throw new ArgumentException("Invalid path name: {0}", rootPath);
             }
+
+            Console.WriteLine("thread {1}: Started travesing {0}", rootPath, Thread.CurrentThread.ManagedThreadId);
 
             int processorCnt = System.Environment.ProcessorCount;
 
@@ -47,12 +49,12 @@ namespace MultiThreading
             {
                 string currentDir = directories.Dequeue();
 
-                string[] subDirs = { };
+                string[] nestedDirs = { };
                 string[] files = { };
 
                 try
                 {
-                    subDirs = Directory.GetDirectories(currentDir);
+                    nestedDirs = Directory.GetDirectories(currentDir);
                 }
                 catch (Exception exc)
                 {
@@ -84,7 +86,7 @@ namespace MultiThreading
                 }
 
                 int procDirCnt = 0;
-                foreach (var dir in subDirs)
+                foreach (var dir in nestedDirs)
                 {
                     procDirCnt++;
                     if (procDirCnt < processorCnt)
@@ -92,8 +94,7 @@ namespace MultiThreading
                         var thread = new Thread(TraverseDir);
                         Console.WriteLine("Thread {0}: spawned traversing thread {1}", Thread.CurrentThread.ManagedThreadId, thread.ManagedThreadId);
                         thread.Start(dir);
-                    }
-                        
+                    }  
                     else
                         directories.Enqueue(dir);
                 }
@@ -122,7 +123,8 @@ namespace MultiThreading
 
             using (ZipArchive zipFile = ZipFile.Open(fileName + ".zip", ZipArchiveMode.Create))
             {
-                zipFile.CreateEntryFromFile(fileName, fileName);
+                FileInfo fi = new FileInfo(fileName);
+                zipFile.CreateEntryFromFile(fileName, fi.Name);
             }
         }
     }
