@@ -9,9 +9,8 @@ namespace MultiThreading
 {
     public static class StringReplacer
     {
-        public static object syncObj = 0;
+        private static object _syncObj = 0;
 
-        public static int filesOpen = 0;
         public static void ReplaceInDir(string rootPath, string source, string dest, string[] suffixFilter, string logFileName)
         {
 
@@ -71,7 +70,6 @@ namespace MultiThreading
 
         public static void ReplaceInFile(string fileName, string source, string dest, string[] suffixFilter, string logFileName)
         {
-
             bool passed = false;
 
             if (fileName == logFileName)
@@ -88,8 +86,9 @@ namespace MultiThreading
                 return;
 
             StringBuilder logBuf = new StringBuilder();
-            //Console.WriteLine("Reading from {0}", fileName);
+            
             string[] lines = File.ReadAllLines(fileName);
+
             for (int i = 0; i < lines.Length; i++)
             {
                 string newLine = lines[i].Replace(source, dest);
@@ -106,9 +105,8 @@ namespace MultiThreading
             }
 
             File.WriteAllLines(fileName, lines);
-            //Console.WriteLine("Writing to {0}", fileName);
-
-            lock (syncObj)
+            
+            lock (_syncObj)
             {
                 using (StreamWriter logFile = File.AppendText(@"D:\test\log.txt"))
                 {
