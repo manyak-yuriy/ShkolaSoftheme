@@ -10,7 +10,7 @@ namespace MultiThreading
     public static class StringReplacer
     {
         public static object syncObj = 0;
-        public static void ReplaceInDir(string rootPath, string source, string dest, string[] suffixFilter)
+        public static void ReplaceInDir(string rootPath, string source, string dest, string[] suffixFilter, string logFileName)
         {
 
             if (!Directory.Exists(rootPath))
@@ -50,7 +50,7 @@ namespace MultiThreading
 
                 foreach (var file in files)
                 {
-                    Task.Factory.StartNew(() => { ReplaceInFile(file, source, dest, suffixFilter); });
+                    Task.Factory.StartNew(() => { ReplaceInFile(file, source, dest, suffixFilter, logFileName); });
                 }
 
 
@@ -62,9 +62,12 @@ namespace MultiThreading
 
         }
 
-        public static void ReplaceInFile(string fileName, string source, string dest, string[] suffixFilter)
+        public static void ReplaceInFile(string fileName, string source, string dest, string[] suffixFilter, string logFileName)
         {
             bool passed = false;
+
+            if (fileName == logFileName)
+                return;
 
             foreach (var filter in suffixFilter)
                 if (fileName.EndsWith(filter))

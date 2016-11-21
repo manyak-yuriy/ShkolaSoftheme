@@ -29,7 +29,7 @@ namespace TPLMultiTasking
             if (filePath.Length == 0)
                 filePath = rootDir;
 
-            StringReplacer.ReplaceInDir(filePath, source, dest, new string[] {".dat", ".txt"});
+            StringReplacer.ReplaceInDir(filePath, source, dest, new string[] {".dat", ".txt"}, "log.txt");
 
             Console.ReadKey();
         }
