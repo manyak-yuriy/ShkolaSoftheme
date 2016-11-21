@@ -10,6 +10,8 @@ namespace MultiThreading
     public static class StringReplacer
     {
         public static object syncObj = 0;
+
+        public static int filesOpen = 0;
         public static void ReplaceInDir(string rootPath, string source, string dest, string[] suffixFilter, string logFileName)
         {
 
@@ -47,12 +49,17 @@ namespace MultiThreading
                     Console.WriteLine(exc.Message);
                 }
 
-
-                foreach (var file in files)
+                try
                 {
-                    Task.Factory.StartNew(() => { ReplaceInFile(file, source, dest, suffixFilter, logFileName); });
+                    Parallel.ForEach(files, (f) => { ReplaceInFile(f, source, dest, suffixFilter, logFileName); });
                 }
-
+                catch (AggregateException ae)
+                {
+                    ae.Handle((ex) => {
+                        Console.WriteLine(ex.Message);
+                        return true;
+                    });
+                }
 
                 foreach (var dir in nestedDirs)
                 {
@@ -64,6 +71,7 @@ namespace MultiThreading
 
         public static void ReplaceInFile(string fileName, string source, string dest, string[] suffixFilter, string logFileName)
         {
+
             bool passed = false;
 
             if (fileName == logFileName)
@@ -80,7 +88,7 @@ namespace MultiThreading
                 return;
 
             StringBuilder logBuf = new StringBuilder();
-            Console.WriteLine("Reading from {0}", fileName);
+            //Console.WriteLine("Reading from {0}", fileName);
             string[] lines = File.ReadAllLines(fileName);
             for (int i = 0; i < lines.Length; i++)
             {
@@ -96,9 +104,9 @@ namespace MultiThreading
                 }
 
             }
-            
+
             File.WriteAllLines(fileName, lines);
-            Console.WriteLine("Writing to {0}", fileName);
+            //Console.WriteLine("Writing to {0}", fileName);
 
             lock (syncObj)
             {
